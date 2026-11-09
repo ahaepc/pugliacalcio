@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173a7a">
+<meta name="description" content="Hemmamatcher i Serie A–D för lag från Puglia, med avstånd och restid från Ceglie Messapica.">
+<title>Puglia Calcio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='45' fill='%23173a7a' stroke='%23e8b021' stroke-width='6'/%3E%3Cpath d='M48 30 L67 62 H29 Z' fill='%23e8b021'/%3E%3Crect x='28' y='62' width='40' height='13' fill='%23fff'/%3E%3Ccircle cx='48' cy='22' r='9' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f3f5f9; --panel: #ffffff; --fg: #1c2440; --muted: #5d687c; --line: #dde2ea; --hover: #eef2f8;
+    --ok: #23874a; --warn: #b9770a; --bad: #c63d33;
+    --blue: #2a5bb8; --blue-deep: #173a7a; --blue-text: #2a5bb8; --gold: #e8b021; --gold-soft: #f6d873; --terra: #c8623a; --on-gold: #1c2440;
+    --ok-bg: #e5f4ea; --warn-bg: #fcf1d9; --bad-bg: #fbe4e2;
+    --region: #eef1f5; --region-line: #c9d0db; --puglia: #fbefc9; --puglia-line: #c9a54a;
+    --radius: 10px; --shadow: 0 1px 2px rgba(20,30,60,.06), 0 2px 8px rgba(20,30,60,.05);
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --serif: Georgia, "Times New Roman", serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f131b; --panel: #171d28; --fg: #e7ebf2; --muted: #9ba6b9; --line: #2a3344; --hover: #1f2735;
+      --ok: #55c27a; --warn: #f0b13a; --bad: #f07067;
+      --blue-text: #8fb0f0; --ok-bg: #16301f; --warn-bg: #352a12; --bad-bg: #3a1c1a;
+      --region: #1b2230; --region-line: #33405a; --puglia: #3a3320; --puglia-line: #8c7537;
+      --shadow: none; color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.45 var(--font); }
+  a { color: inherit; }
+  button, input, select { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+
+  /* header */
+  .top { background: var(--blue-deep); color: #fff; border-bottom: 4px solid var(--gold); padding-top: env(safe-area-inset-top); }
+  .top .wrap { display: flex; align-items: center; gap: 12px; padding-top: 12px; padding-bottom: 12px; }
+  .logo { width: 44px; height: 44px; flex: none; }
+  .brand { min-width: 0; flex: 1; }
+  .brand h1 { margin: 0; font-size: 22px; line-height: 1; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+  .brand h1 span + span { color: var(--gold); margin-left: .2em; }
+  .brand p { margin: 4px 0 0; font-size: 13px; color: var(--gold-soft); font-style: italic; }
+  .langs { display: inline-flex; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; overflow: hidden; flex: none; }
+  .langs button { background: none; border: 0; color: #fff; padding: 6px 10px; font-size: 13px; font-weight: 600; cursor: pointer; min-width: 40px; min-height: 36px; }
+  .langs button[aria-pressed=true] { background: var(--gold); color: var(--on-gold); }
+
+  /* tabs */
+  .tabs { position: sticky; top: 0; z-index: 20; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); }
+  .tabs .wrap { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .tabs .wrap::-webkit-scrollbar { display: none; }
+  .tab { flex: 1 0 auto; background: none; border: 0; border-bottom: 3px solid transparent; padding: 12px 14px; font-size: 15px; color: var(--muted); cursor: pointer; white-space: nowrap; min-height: 48px; }
+  .tab[aria-selected=true] { color: var(--blue-text); border-bottom-color: var(--gold); font-weight: 600; }
+
+  main.wrap { display: grid; gap: 16px; padding-top: 16px; padding-bottom: 32px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); min-width: 0; }
+  h2 { margin: 0; font-size: 19px; color: var(--blue-text); font-weight: 650; }
+  .note { margin: 4px 0 12px; font-size: 14px; color: var(--muted); }
+
+  /* filters */
+  .filters { border-top: 3px solid var(--gold); padding: 0; }
+  .ftoggle { display: flex; width: 100%; align-items: center; gap: 10px; background: none; border: 0; padding: 14px 16px; cursor: pointer; text-align: left; min-height: 52px; }
+  .ftoggle b { font-weight: 650; }
+  .ftoggle .fsum { flex: 1; min-width: 0; font-size: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ftoggle .chev { transition: transform .2s; }
+  .filters.open .ftoggle .chev { transform: rotate(180deg); }
+  .fbody { display: none; padding: 0 16px 16px; gap: 16px; }
+  .filters.open .fbody { display: grid; }
+  .f { display: grid; gap: 6px; font-size: 14px; color: var(--muted); min-width: 0; }
+  .f-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .range { display: flex; align-items: center; gap: 12px; }
+  .range input { flex: 1; min-width: 0; accent-color: var(--blue); height: 32px; }
+  .range output { min-width: 5.5rem; text-align: right; color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .input { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 16px; min-height: 44px; }
+  .leagues { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .leagues legend { padding: 0; margin-bottom: 6px; font-size: 14px; color: var(--muted); }
+  .chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; min-height: 44px; cursor: pointer; color: var(--fg); background: var(--bg); }
+  .chip input { accent-color: var(--blue); width: 18px; height: 18px; margin: 0; }
+  .chip.off { color: var(--muted); cursor: default; font-size: 13px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .btn { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; min-height: 44px; cursor: pointer; font-size: 15px; }
+  .btn:hover { background: var(--hover); }
+  .btn-blue { background: var(--blue); border-color: var(--blue); color: #fff; font-weight: 600; }
+  .btn-blue:hover { background: var(--blue-deep); }
+  .btn[disabled] { opacity: .6; cursor: default; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button { background: none; border: 0; padding: 6px 12px; min-height: 40px; font-size: 14px; color: var(--muted); cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed=true] { background: var(--blue); color: #fff; font-weight: 600; }
+
+  /* summary */
+  .summary { display: grid; gap: 8px; }
+  .take { margin: 0; font-size: 18px; }
+  .take b { color: var(--blue-text); }
+  .meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+  .meta .warn { color: var(--warn); }
+  .meta .okc { color: var(--ok); }
+  .meta .errc { color: var(--bad); }
+
+  /* kpis */
+  .kpis { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--blue); border-radius: var(--radius); padding: 12px; min-width: 0; }
+  .kpi-l { font-size: 13px; color: var(--muted); }
+  .kpi-v { font-family: var(--serif); font-size: 26px; color: var(--blue-text); font-variant-numeric: tabular-nums; margin-top: 2px; line-height: 1.15; }
+  .kpi-v.small { font-family: var(--font); font-size: 14px; line-height: 1.35; }
+
+  /* legend */
+  .legend { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+  .legend li { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex: none; }
+  .sw-ok { background: var(--ok-bg); box-shadow: inset 3px 0 0 var(--ok); }
+  .sw-date { background: var(--warn-bg); box-shadow: inset 3px 0 0 var(--warn); }
+  .sw-pre { background: var(--bad-bg); box-shadow: inset 3px 0 0 var(--bad); }
+  .sw-grey { background: var(--muted); opacity: .5; }
+  .sw-dot { border-radius: 50%; }
+  .sw-o { border-radius: 50%; border: 1.5px solid var(--muted); }
+  .sw-home { background: var(--fg); width: 9px; height: 9px; border-radius: 1px; transform: rotate(45deg); }
+
+  .tools { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+  @media (min-width: 520px) { .tools { grid-template-columns: 1fr auto; } }
+  .tools select { min-height: 44px; }
+
+  /* match cards (phone) */
+  .mlist { display: grid; gap: 10px; }
+  .mc { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 12px 12px 16px; position: relative; overflow: hidden; display: grid; gap: 4px; background: var(--panel); }
+  .mc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--st); }
+  .mc.st-ok { --st: var(--ok); background: color-mix(in srgb, var(--ok-bg) 55%, var(--panel)); }
+  .mc.st-date { --st: var(--warn); background: color-mix(in srgb, var(--warn-bg) 55%, var(--panel)); }
+  .mc.st-pre { --st: var(--bad); background: color-mix(in srgb, var(--bad-bg) 55%, var(--panel)); }
+  .mc-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+  .mc-date { font-weight: 650; }
+  .mc-time { font-variant-numeric: tabular-nums; }
+  .mc-time.unset { color: var(--muted); font-style: italic; }
+  .mc-top .pill { margin-left: auto; }
+  .mc-teams { font-size: 17px; line-height: 1.3; }
+  .mc-teams b { font-weight: 650; }
+  .mc-arena, .mc-dist { font-size: 14px; color: var(--muted); }
+  .mc-arena a { color: var(--fg); }
+  .mc-dist { display: flex; flex-wrap: wrap; gap: 2px 12px; font-variant-numeric: tabular-nums; }
+  .mc-note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+  .mc details { font-size: 12px; color: var(--muted); }
+  .mc summary { cursor: pointer; padding: 4px 0; }
+
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; line-height: 1.5; }
+  .lg-a { background: var(--blue); color: #fff; }
+  .lg-c { background: var(--gold); color: var(--on-gold); }
+  .lg-d { background: var(--terra); color: #fff; }
+  .status { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .s-ok { color: var(--ok); } .s-date { color: var(--warn); } .s-pre { color: var(--bad); }
+
+  /* match table (wide screens) */
+  .tscroll { max-height: 70vh; overflow: auto; border-top: 1px solid var(--line); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+  th { position: sticky; top: 0; background: var(--panel); text-align: left; font-weight: 600; color: var(--muted); padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; z-index: 1; }
+  th button { background: none; border: 0; padding: 0; cursor: pointer; color: inherit; font-weight: 600; }
+  th[aria-sort] button { color: var(--fg); }
+  th[aria-sort=ascending] button::after { content: " ▲"; font-size: 10px; }
+  th[aria-sort=descending] button::after { content: " ▼"; font-size: 10px; }
+  td { padding: 8px; border-bottom: 1px solid var(--panel); vertical-align: top; }
+  td.num, th.num { text-align: right; }
+  td.nw { white-space: nowrap; }
+  td.mut { color: var(--muted); }
+  tr.st-ok td { background: color-mix(in srgb, var(--ok-bg) 80%, var(--panel)); }
+  tr.st-date td { background: color-mix(in srgb, var(--warn-bg) 80%, var(--panel)); }
+  tr.st-pre td { background: color-mix(in srgb, var(--bad-bg) 80%, var(--panel)); }
+  tr.st-ok td:first-child { box-shadow: inset 4px 0 0 var(--ok); }
+  tr.st-date td:first-child { box-shadow: inset 4px 0 0 var(--warn); }
+  tr.st-pre td:first-child { box-shadow: inset 4px 0 0 var(--bad); }
+  td:first-child { padding-left: 12px; }
+  .empty { color: var(--muted); margin: 12px 0 0; }
+
+  /* map */
+  .map { position: relative; border-radius: 8px; overflow: hidden; background: var(--bg); touch-action: none; }
+  .map svg { display: block; width: 100%; height: auto; cursor: grab; }
+  .region { fill: var(--region); stroke: var(--region-line); vector-effect: non-scaling-stroke; stroke-width: 1; }
+  .region.puglia { fill: var(--puglia); stroke: var(--puglia-line); stroke-width: 1.4; }
+  .venue { stroke: var(--panel); vector-effect: non-scaling-stroke; stroke-width: 1.5; cursor: pointer; }
+  .venue.none { fill: var(--panel); stroke: var(--muted); }
+  .venue.sel { stroke: var(--fg); stroke-width: 3; }
+  .home { fill: var(--fg); }
+  .maplabel { font-size: 12px; fill: var(--fg); paint-order: stroke; stroke: var(--bg); stroke-width: 3px; pointer-events: none; }
+  .map-tools { position: absolute; right: 8px; top: 8px; display: flex; gap: 6px; }
+  .map-tools button { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; width: 40px; height: 40px; font-size: 20px; cursor: pointer; line-height: 1; }
+  .vpanel { margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; display: grid; gap: 4px; font-size: 14px; }
+  .vpanel b { font-size: 16px; }
+  .vpanel .mut { color: var(--muted); }
+  .vpanel .btn { justify-self: start; margin-top: 6px; }
+  .maplegend { margin-top: 12px; }
+
+  /* venue cards */
+  .sechead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: end; justify-content: space-between; }
+  .venues { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .vc { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--lg, var(--blue)); border-radius: var(--radius); padding: 14px; display: grid; gap: 8px; align-content: start; box-shadow: var(--shadow); }
+  .vc h3 { margin: 0; font-size: 17px; line-height: 1.3; }
+  .vc h3 small { font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
+  .vc-meta { font-size: 13px; color: var(--muted); }
+  .vc-cap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .vc-num { font-family: var(--serif); font-size: 28px; color: var(--blue-text); font-variant-numeric: tabular-nums; }
+  .vc-unit { font-size: 13px; color: var(--muted); }
+  .vc-note { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .vc-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px; font-size: 14px; font-variant-numeric: tabular-nums; }
+
+  /* about */
+  .about h3 { font-size: 16px; margin: 20px 0 8px; }
+  .about h3:first-of-type { margin-top: 12px; }
+  .about dl { margin: 0; display: grid; gap: 10px; font-size: 14px; }
+  .about dt { font-weight: 650; }
+  .about dd { margin: 2px 0 0; color: var(--muted); }
+
+  footer { text-align: center; font-size: 13px; color: var(--muted); padding: 8px 16px calc(24px + env(safe-area-inset-bottom)); }
+
+  .loading { color: var(--muted); padding: 24px 0; text-align: center; }
+
+  @media (min-width: 760px) {
+    .brand h1 { font-size: 28px; }
+    .logo { width: 52px; height: 52px; }
+    .tab { flex: 0 0 auto; padding: 12px 18px; }
+    .ftoggle { display: none; }
+    .fbody { display: grid !important; padding: 16px; grid-template-columns: minmax(260px, 1.4fr) minmax(260px, 1fr); align-items: end; }
+    .fbody .leagues, .fbody .row { grid-column: span 1; }
+    .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .take { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 96 96" role="img" aria-label="Puglia Calcio">
+      <circle cx="48" cy="48" r="45" fill="#173a7a" stroke="#e8b021" stroke-width="6"/>
+      <path d="M48 30 L67 62 H29 Z" fill="#e8b021"/>
+      <path d="M42 40 H54 M38.5 47 H57.5 M35 54 H61" stroke="#173a7a" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+      <rect x="28" y="62" width="40" height="13" rx="1.5" fill="#ffffff"/>
+      <path d="M44 75 V69 a4 4 0 0 1 8 0 V75 Z" fill="#2a5bb8"/>
+      <circle cx="48" cy="22" r="9" fill="#ffffff" stroke="#173a7a" stroke-width="1.6"/>
+      <path d="M48 17.8 L52 20.7 L50.5 25.4 H45.5 L44 20.7 Z" fill="#173a7a"/>
+      <path d="M48 17.8 V13.4 M52 20.7 L56.2 19.4 M50.5 25.4 L53.2 29 M45.5 25.4 L42.8 29 M44 20.7 L39.8 19.4" stroke="#173a7a" stroke-width="1.3"/>
+    </svg>
+    <div class="brand">
+      <h1><span>Puglia</span><span>Calcio</span></h1>
+      <p data-t="sub"></p>
+    </div>
+    <div class="langs" role="group" data-t-aria="lang">
+      <button type="button" data-lang="sv" lang="sv">SV</button>
+      <button type="button" data-lang="it" lang="it">IT</button>
+      <button type="button" data-lang="en" lang="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <div class="wrap">
+    <button class="tab" type="button" role="tab" data-tab="matches" data-t="tabMatches"></button>
+    <button class="tab" type="button" role="tab" data-tab="map" data-t="tabMap"></button>
+    <button class="tab" type="button" role="tab" data-tab="grounds" data-t="tabVenues"></button>
+    <button class="tab" type="button" role="tab" data-tab="about" data-t="tabAbout"></button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="card filters" id="filters">
+    <button class="ftoggle" type="button" aria-expanded="false" aria-controls="fbody">
+      <b data-t="filters"></b><span class="fsum" id="fsum"></span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    </button>
+    <div class="fbody" id="fbody">
+      <div class="f">
+        <div class="f-head"><span data-t="distLabel"></span>
+          <span class="seg" role="group">
+            <button type="button" data-dist="km" data-t="km"></button>
+            <button type="button" data-dist="min" data-t="drive"></button>
+          </span>
+        </div>
+        <div class="range" data-distrow="km"><input id="maxKm" type="range" min="15" max="230" step="5"><output id="kmVal"></output></div>
+        <div class="range" data-distrow="min"><input id="maxMin" type="range" min="15" max="170" step="5"><output id="minVal"></output></div>
+      </div>
+      <div class="dates">
+        <label class="f"><span data-t="from"></span><input class="input" id="from" type="date" min="2026-08-01" max="2027-06-30"></label>
+        <label class="f"><span data-t="to"></span><input class="input" id="to" type="date" min="2026-08-01" max="2027-06-30"></label>
+      </div>
+      <fieldset class="leagues">
+        <legend data-t="league"></legend>
+        <label class="chip"><input class="lg" type="checkbox" value="Serie A"> Serie A</label>
+        <label class="chip"><input class="lg" type="checkbox" value="Serie C"> Serie C</label>
+        <label class="chip"><input class="lg" type="checkbox" value="Serie D"> Serie D</label>
+        <span class="chip off">Serie B <span data-t="serieB"></span></span>
+      </fieldset>
+      <div class="row">
+        <button class="btn" type="button" id="picked" hidden></button>
+        <button class="btn" type="button" id="reset" data-t="reset"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="summary">
+    <p class="take" id="take"></p>
+    <div class="meta" id="updated"></div>
+    <div class="row">
+      <button class="btn btn-blue" type="button" id="pdf" data-t="pdf"></button>
+      <span class="meta" id="pdfMsg"></span>
+    </div>
+  </section>
+
+  <!-- MATCHES -->
+  <section class="page" id="page-matches">
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-l" data-t="kCount"></div><div class="kpi-v" id="kCount">—</div></div>
+      <div class="kpi"><div class="kpi-l" data-t="kVenues"></div><div class="kpi-v" id="kVenues">—</div></div>
+      <div class="kpi"><div class="kpi-l" data-t="kShort"></div><div class="kpi-v" id="kShort">—</div></div>
+      <div class="kpi"><div class="kpi-l" data-t="kNext"></div><div class="kpi-v small" id="kNext">—</div></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2 data-t="tabMatches"></h2>
+      <p class="note" data-t="matchesNote"></p>
+      <ul class="legend">
+        <li><span class="sw sw-ok"></span><span data-t="lgOk"></span></li>
+        <li><span class="sw sw-date"></span><span data-t="lgDate"></span></li>
+        <li><span class="sw sw-pre"></span><span data-t="lgPre"></span></li>
+        <li><span class="sw sw-grey"></span><span data-t="lgGrey"></span></li>
+      </ul>
+      <div class="tools">
+        <input class="input" id="search" type="search" autocomplete="off">
+        <select class="input" id="sortSel"></select>
+      </div>
+      <div id="mlist"><p class="loading" data-t="loading"></p></div>
+      <p class="empty" id="empty" data-t="empty" hidden></p>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section class="page" id="page-map" hidden>
+    <div class="card">
+      <h2 data-t="tabMap"></h2>
+      <p class="note" data-t="mapNote"></p>
+      <div class="map" id="map">
+        <div class="map-tools">
+          <button type="button" id="zin" aria-label="+">+</button>
+          <button type="button" id="zout" aria-label="−">−</button>
+          <button type="button" id="zreset" data-t-aria="zoomReset">⟲</button>
+        </div>
+      </div>
+      <div class="vpanel" id="vpanel"><span class="mut" data-t="mapHint"></span></div>
+      <ul class="legend maplegend">
+        <li><span class="sw sw-dot" style="background:#2a5bb8"></span>Serie A</li>
+        <li><span class="sw sw-dot" style="background:#e8b021"></span>Serie C</li>
+        <li><span class="sw sw-dot" style="background:#c8623a"></span>Serie D</li>
+        <li><span class="sw sw-o"></span><span data-t="lgNone"></span></li>
+        <li><span class="sw sw-home"></span>Ceglie Messapica</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- GROUNDS -->
+  <section class="page" id="page-grounds" hidden>
+    <div class="sechead">
+      <div><h2 data-t="tabVenues"></h2><p class="note" data-t="venuesNote"></p></div>
+      <div class="seg" role="group" style="margin-bottom:12px">
+        <button type="button" data-vsort="km" data-t="vNear"></button>
+        <button type="button" data-vsort="capacity" data-t="vBig"></button>
+        <button type="button" data-vsort="stadium" data-t="vName"></button>
+      </div>
+    </div>
+    <div class="venues" id="venues"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="page" id="page-about" hidden>
+    <div class="card about"><h2 data-t="tabAbout"></h2><div id="about"></div></div>
+  </section>
+</main>
+
+<footer data-t="foot"></footer>
+
+<script src="config.js"></script>
+<script src="i18n.js"></script>
+<script src="d3.min.js"></script>
+<script src="pdfexport.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
