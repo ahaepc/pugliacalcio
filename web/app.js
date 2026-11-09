@@ -189,6 +189,7 @@
     else $('#kNext').textContent = '—';
     const up = $('#updated'); up.replaceChildren();
     if (D.site && D.site.updated) up.append(el('span', '', fill(t('updated'), { date: fmtLong(D.site.updated.slice(0, 10)) })));
+    up.append(el('span', 'caveat', t('caveat')));
     if (D.fallback) up.append(el('span', 'warn', t('fallback')));
   }
 
